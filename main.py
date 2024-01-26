@@ -69,11 +69,14 @@ def main():
         description="Script to interact with Prisma Cloud API."
     )
     parser.add_argument("--endpoint", type=str, required=True, help="API endpoint")
+    parser.add_argument(
+        "--type", type=str, required=True, help="Request Type (GET/POST/PUT)"
+    )
     args = parser.parse_args()
 
     accessKey = os.environ.get("PC_IDENTITY")
     accessSecret = os.environ.get("PC_SECRET")
-    base_url = os.environ.get("PC_URL")
+    base_url = os.environ.get("TL_URL")
     api_version = "1"
     csv.field_size_limit(10000000)
 
@@ -83,7 +86,7 @@ def main():
     logging.info("Token: %s", pcToken[1]["token"])
 
     pcData = make_request(
-        base_url, api_version, args.endpoint, pcToken[1]["token"], "text/csv", "GET"
+        base_url, api_version, args.endpoint, pcToken[1]["token"], "text/csv", args.type
     )
     if pcData[0] != 200:
         exit()
