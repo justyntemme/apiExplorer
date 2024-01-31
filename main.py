@@ -6,8 +6,12 @@ import csv
 import argparse
 from typing import Tuple, Optional
 from urllib.parse import urlparse, urlunparse
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 logging.basicConfig(level=logging.INFO)
+
+# Suppress only the single InsecureRequestWarning from urllib3 needed
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
 def get_base_url(full_url: str) -> str:
@@ -53,7 +57,9 @@ def prisma_login(
     }
     body = {"username": access_key, "password": secret_key}
     logging.info("Generating token using endpoint: %s", apiURL)
-    response = requests.post(apiURL, headers=headers, json=body, timeout=60)
+    response = requests.post(
+        apiURL, headers=headers, json=body, timeout=60, verify=False
+    )
     if response.status_code == 200:
         data = json.loads(response.text)
         logging.info("Token acquired")
@@ -77,9 +83,9 @@ def make_request(
     logging.info(f"Making {method} request to {url}")
 
     if method.upper() == "GET":
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, verify=False)
     elif method.upper() == "POST":
-        response = requests.post(url, headers=headers, json=data)
+        response = requests.post(url, headers=headers, json=data, verify=False)
     else:
         logging.error(f"Invalid request method: {method}")
         return 405, None
