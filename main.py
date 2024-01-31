@@ -146,7 +146,7 @@ def main():
         pcData = make_request(
             args.url, api_version, pcToken[1]["token"], "text/csv", args.type, None
         )
-    elif args.csv:
+    else:
         pcData = make_request(
             args.url,
             api_version,
