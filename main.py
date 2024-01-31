@@ -109,12 +109,31 @@ def main():
     parser.add_argument(
         "--url", type=str, required=True, help="Request URL overrides default"
     )
+    parser.add_argument(
+        "--data",
+        type=str,
+        required=False,
+        help="json object to pass as body of request (uses data parameter)",
+    )
+    parser.add_argument(
+        "--json",
+        type=bool,
+        required=False,
+        help="flag that when set to true sets content_type to application/json\
+                When value is set to false content_type is set to text/csv",
+    )
+    parser.add_argument(
+        "--csv",
+        type=bool,
+        required=False,
+        help="flag that when set to tru sts content_type to text/csv\
+                when value is set to false, its set to application/json",
+    )
 
     args = parser.parse_args()
 
     accessKey = os.environ.get("PC_IDENTITY")
     accessSecret = os.environ.get("PC_SECRET")
-    base_url = os.environ.get("TL_URL")
     api_version = "1"
     csv.field_size_limit(10000000)
 
@@ -123,10 +142,19 @@ def main():
     if pcToken[0] != 200:
         exit()
     logging.info("Token: %s", pcToken[1]["token"])
-
-    pcData = make_request(
-        args.url, api_version, pcToken[1]["token"], "text/csv", args.type, None
-    )
+    if args.json:
+        pcData = make_request(
+            args.url, api_version, pcToken[1]["token"], "text/csv", args.type, None
+        )
+    elif args.csv:
+        pcData = make_request(
+            args.url,
+            api_version,
+            pcToken[1]["token"],
+            "application/json",
+            args.type,
+            None,
+        )
     if pcData[0] != 200:
         exit()
     print(pcData[1])
