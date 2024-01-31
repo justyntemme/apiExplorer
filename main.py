@@ -60,6 +60,8 @@ def prisma_login(
     response = requests.post(
         apiURL, headers=headers, json=body, timeout=60, verify=False
     )
+    if response.status_code == 404:
+        print("You are probably forgetting /api/v1 prior to your endpoint ")
     if response.status_code == 200:
         data = json.loads(response.text)
         logging.info("Token acquired")
