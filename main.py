@@ -46,7 +46,7 @@ def prisma_login(
     if is_twistlock_in_url(base_url):
         apiURL = f"{base_url}/v1/authenticate"
     else:
-        apiURL = f"{base_url}/v1/login"
+        apiURL = f"{base_url}/login"
     headers = {
         "accept": "application/json; charset=UTF-8",
         "content-type": "application/json",
