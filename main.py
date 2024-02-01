@@ -83,7 +83,7 @@ def make_request(
     access_token: str,
     content_type: str,
     method: str,
-    data: Optional[dict],
+    data: Optional[json.loads],
 ) -> Tuple[int, Optional[str]]:
     headers = {
         "Content-Type": content_type,
@@ -96,7 +96,7 @@ def make_request(
     if method.upper() == "GET":
         response = requests.get(url, headers=headers, verify=False)
     elif method.upper() == "POST":
-        response = requests.post(url, headers=headers, json=data, verify=False)
+        response = requests.post(url, headers=headers, verify=False, json=data)
     else:
         logging.error(f"Invalid request method: {method}")
         return 405, None
@@ -122,7 +122,7 @@ def main():
     )
     parser.add_argument(
         "--data",
-        type=str,
+        type=json.loads,
         required=False,
         help="json object to pass as body of request (uses data parameter)",
     )
@@ -148,13 +148,12 @@ def main():
     api_version = "1"
 
     pcToken = prisma_login(args.url, api_version, accessKey, accessSecret)
-    logging.info("Token: %s", pcToken[1]["token"])
     if pcToken[0] != 200:
         print("Error aquiring token")
         exit()
     if args.json:
         pcData = make_request(
-            args.url, api_version, pcToken[1]["token"], "text/csv", args.type, None
+            args.url, api_version, pcToken[1]["token"], "text/csv", args.type, args.data
         )
     else:
         pcData = make_request(
@@ -163,7 +162,7 @@ def main():
             pcToken[1]["token"],
             "application/json",
             args.type,
-            None,
+            args.data,
         )
     if pcData[0] != 200:
         exit()
