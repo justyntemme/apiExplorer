@@ -14,6 +14,12 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
 def parse_arguments():
+    """
+    Parses command-line arguments for the script.
+
+    Returns:
+        argparse.Namespace: Parsed command-line arguments.
+    """
     parser = argparse.ArgumentParser(description="Interact with Prisma Cloud API.")
     parser.add_argument("--url", required=True, help="The API URL to interact with.")
     parser.add_argument(
@@ -41,6 +47,16 @@ def parse_arguments():
 
 
 def get_base_url(full_url: str) -> str:
+    """
+    Extracts the base URL from a full URL string.
+
+    Parameters:
+        full_url (str): The full URL to extract the base from.
+
+    Returns:
+        str: The base URL.
+    """
+
     parsed_url = urlparse(full_url)
     # Construct the base URL by keeping only the scheme, netloc
     # and path (up to the second last segment)
@@ -51,6 +67,15 @@ def get_base_url(full_url: str) -> str:
 
 
 def return_hostname(url: str) -> str:
+    """
+    Returns the hostname of a given URL.
+
+    Parameters:
+        url (str): The URL from which to extract the hostname.
+
+    Returns:
+        str: The hostname of the URL.
+    """
     parsed_url = urlparse(url)
     return parsed_url.hostname
 
@@ -73,6 +98,18 @@ def is_twistlock_in_url(url: str) -> bool:
 def prisma_login(
     url: str, api_version: str, access_key: str, secret_key: str
 ) -> Tuple[int, dict]:
+    """
+    Authenticates with the Prisma Cloud API and retrieves a token.
+
+    Parameters:
+        url (str): The URL to authenticate against.
+        api_version (str): The API version to use.
+        access_key (str): The access key for authentication.
+        secret_key (str): The secret key for authentication.
+
+    Returns:
+        Tuple[int, Optional[dict]]: The status code and optionally the token if authentication was successful.
+    """
     base_url = get_base_url(url)
     if is_twistlock_in_url(base_url):
         apiURL = f"{base_url}/v1/authenticate"
@@ -113,6 +150,20 @@ def make_request(
     method: str,
     data: Optional[json.loads],
 ) -> Tuple[int, Optional[str]]:
+    """
+    Makes an HTTP request to the specified URL.
+
+    Parameters:
+        url (str): The URL to make the request to.
+        api_version (str): The version of the API to use.
+        access_token (str): The token for authentication.
+        content_type (str): The content type of the request.
+        method (str): The HTTP method to use.
+        data (Optional[dict]): The data to send in the request.
+
+    Returns:
+        Tuple[int, Optional[str]]: The response status code and optionally the response data.
+    """
     headers = {
         "Content-Type": content_type,
     }
