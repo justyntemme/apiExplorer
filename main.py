@@ -87,9 +87,11 @@ def make_request(
 ) -> Tuple[int, Optional[str]]:
     headers = {
         "Content-Type": content_type,
-        # "Authorization": f"Bearer {access_token}",
-        "x-redlock-auth": f"{access_token}",
     }
+    if is_twistlock_in_url(url):
+        headers["Authorization"] = f"Bearer {access_token}"
+    else:
+        headers["x-redlock-auth"] = f"{access_token}"
     logging.info(f"{headers}")
     logging.info(f"Making {method} request to {url}")
 
