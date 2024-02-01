@@ -13,9 +13,37 @@ logging.basicConfig(level=logging.INFO)
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
+def parse_arguments():
+    parser = argparse.ArgumentParser(description="Interact with Prisma Cloud API.")
+    parser.add_argument("--url", required=True, help="The API URL to interact with.")
+    parser.add_argument(
+        "--type",
+        choices=["GET", "POST", "PUT"],
+        required=True,
+        help="HTTP method to use.",
+    )
+    parser.add_argument(
+        "--data",
+        help="JSON payload for POST/PUT requests.",
+        type=json.loads,
+        default={},
+    )
+
+    content_type_group = parser.add_mutually_exclusive_group()
+    content_type_group.add_argument(
+        "--csv",
+        action="store_true",
+        help="Set Content-Type to text/csv. \
+              Defaults to application/json if --csv is not present",
+    )
+
+    return parser.parse_args()
+
+
 def get_base_url(full_url: str) -> str:
     parsed_url = urlparse(full_url)
-    # Construct the base URL by keeping only the scheme, netloc, and path (up to the second last segment)
+    # Construct the base URL by keeping only the scheme, netloc
+    # and path (up to the second last segment)
     path_segments = parsed_url.path.split("/")
     base_path = "/".join(path_segments[:-2])  # Remove the last two segments
     base_url = urlunparse((parsed_url.scheme, parsed_url.netloc, base_path, "", "", ""))
@@ -61,7 +89,10 @@ def prisma_login(
         apiURL, headers=headers, json=body, timeout=60, verify=False
     )
     if response.status_code == 404:
-        print("You are probably forgetting /api/v1 prior to your endpoint ")
+        print(
+            "You are probably forgetting \
+             /api/v1[2,3] prior to your endpoint"
+        )
     if response.status_code == 200:
         data = json.loads(response.text)
         logging.info("Token acquired")
@@ -103,53 +134,29 @@ def make_request(
         return 200, response.text
     else:
         logging.error(
-            f"Failed to query endpoint {url} with status code: {response.status_code}"
+            f"Failed to query endpoint\
+              {url} with status code: {response.status_code}"
         )
         return response.status_code, None
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Script to interact with Prisma Cloud API."
-    )
-    parser.add_argument(
-        "--type", type=str, required=True, help="Request Type (GET/POST/PUT)"
-    )
-    parser.add_argument(
-        "--url", type=str, required=True, help="Request URL overrides default"
-    )
-    parser.add_argument(
-        "--data",
-        type=json.loads,
-        required=False,
-        help="json object to pass as body of request (uses data parameter)",
-    )
-    parser.add_argument(
-        "--json",
-        type=bool,
-        required=False,
-        help="flag that when set to true sets content_type to application/json\
-                When value is set to false content_type is set to text/csv",
-    )
-    parser.add_argument(
-        "--csv",
-        type=bool,
-        required=False,
-        help="flag that when set to tru sts content_type to text/csv\
-                when value is set to false, its set to application/json",
-    )
-
-    args = parser.parse_args()
-
+    args = parse_arguments()
     accessKey = os.environ.get("PC_IDENTITY")
     accessSecret = os.environ.get("PC_SECRET")
+    if not all([accessKey, accessSecret]):
+        logging.error(
+            "Missing required environment variables: PC_IDENTITY or PC_SECRET."
+        )
+        exit(1)
+
     api_version = "1"
 
     pcToken = prisma_login(args.url, api_version, accessKey, accessSecret)
     if pcToken[0] != 200:
         logging.error("Error aquiring token %s", pcToken[0])
         exit()
-    if args.json:
+    if args.csv:
         pcData = make_request(
             args.url, api_version, pcToken[1]["token"], "text/csv", args.type, args.data
         )
