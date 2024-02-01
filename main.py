@@ -44,13 +44,16 @@ def is_twistlock_in_url(url: str) -> bool:
 
 
 def prisma_login(
-    base_url: str, api_version: str, access_key: str, secret_key: str
+    url: str, api_version: str, access_key: str, secret_key: str
 ) -> Tuple[int, dict]:
-    base_url = get_base_url(base_url)
+    base_url = get_base_url(url)
+    print(base_url)
     if is_twistlock_in_url(base_url):
         apiURL = f"{base_url}/v1/authenticate"
     else:
-        apiURL = f"{base_url}/login"
+        base_url = return_hostname(base_url)
+        print(base_url)
+        apiURL = f"https://{base_url}/login"
     headers = {
         "accept": "application/json; charset=UTF-8",
         "content-type": "application/json",
@@ -66,7 +69,11 @@ def prisma_login(
         data = json.loads(response.text)
         logging.info("Token acquired")
         return 200, data
-    logging.error("Unable to acquire token with error code: %s", response.status_code)
+    else:
+        logging.error(
+            "Unable to acquire token with error code: %s", response.status_code
+        )
+
     return response.status_code, None
 
 
@@ -80,8 +87,10 @@ def make_request(
 ) -> Tuple[int, Optional[str]]:
     headers = {
         "Content-Type": content_type,
-        "Authorization": f"Bearer {access_token}",
+        # "Authorization": f"Bearer {access_token}",
+        "x-redlock-auth": f"{access_token}",
     }
+    logging.info(f"{headers}")
     logging.info(f"Making {method} request to {url}")
 
     if method.upper() == "GET":
@@ -137,13 +146,12 @@ def main():
     accessKey = os.environ.get("PC_IDENTITY")
     accessSecret = os.environ.get("PC_SECRET")
     api_version = "1"
-    csv.field_size_limit(10000000)
 
     pcToken = prisma_login(args.url, api_version, accessKey, accessSecret)
-
-    if pcToken[0] != 200:
-        exit()
     logging.info("Token: %s", pcToken[1]["token"])
+    if pcToken[0] != 200:
+        print("Error aquiring token")
+        exit()
     if args.json:
         pcData = make_request(
             args.url, api_version, pcToken[1]["token"], "text/csv", args.type, None
