@@ -2,7 +2,6 @@ import json
 import logging
 import requests
 import os
-import csv
 import argparse
 from typing import Tuple, Optional
 from urllib.parse import urlparse, urlunparse
@@ -47,12 +46,10 @@ def prisma_login(
     url: str, api_version: str, access_key: str, secret_key: str
 ) -> Tuple[int, dict]:
     base_url = get_base_url(url)
-    print(base_url)
     if is_twistlock_in_url(base_url):
         apiURL = f"{base_url}/v1/authenticate"
     else:
         base_url = return_hostname(base_url)
-        print(base_url)
         apiURL = f"https://{base_url}/login"
     headers = {
         "accept": "application/json; charset=UTF-8",
@@ -92,7 +89,6 @@ def make_request(
         headers["Authorization"] = f"Bearer {access_token}"
     else:
         headers["x-redlock-auth"] = f"{access_token}"
-    logging.info(f"{headers}")
     logging.info(f"Making {method} request to {url}")
 
     if method.upper() == "GET":
@@ -151,7 +147,7 @@ def main():
 
     pcToken = prisma_login(args.url, api_version, accessKey, accessSecret)
     if pcToken[0] != 200:
-        print("Error aquiring token")
+        logging.error("Error aquiring token %s", pcToken[0])
         exit()
     if args.json:
         pcData = make_request(
