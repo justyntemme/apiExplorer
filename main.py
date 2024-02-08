@@ -177,6 +177,8 @@ def make_request(
         response = requests.get(url, headers=headers, verify=False)
     elif method.upper() == "POST":
         response = requests.post(url, headers=headers, verify=False, json=data)
+    elif method.upper() == "PUT":
+        response = requests.put(url, headers=headers, verify=False, json=data)
     else:
         logging.error(f"Invalid request method: {method}")
         return 405, None
