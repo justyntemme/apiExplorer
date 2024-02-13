@@ -61,8 +61,20 @@ def get_base_url(full_url: str) -> str:
     # Construct the base URL by keeping only the scheme, netloc
     # and path (up to the second last segment)
     path_segments = parsed_url.path.split("/")
-    base_path = "/".join(path_segments[:-2])  # Remove the last two segments
-    base_url = urlunparse((parsed_url.scheme, parsed_url.netloc, base_path, "", "", ""))
+    print(path_segments)
+    print(len(path_segments))
+    # if len(path_segments) < 2:
+    #    base_path = "/".join(path_segments[:-2])  # Remove the last two segments
+
+    #    else:
+    #        base_path = "/".join(path_segments[:-3])  # Remove last segment
+
+    # base_url = urlunparse((parsed_url.scheme, parsed_url.netloc, base_path, "", "", ""))
+    if is_twistlock_in_url(full_url):
+        base_url = return_hostname(full_url)
+        base_url = "https://" + base_url + "/" + path_segments[1]
+        print("BASE URL %s", base_url)
+        return base_url
     return base_url
 
 
@@ -112,7 +124,7 @@ def prisma_login(
     """
     base_url = get_base_url(url)
     if is_twistlock_in_url(base_url):
-        apiURL = f"{base_url}/v1/authenticate"
+        apiURL = f"{base_url}/api/v1/authenticate"
     else:
         base_url = return_hostname(base_url)
         apiURL = f"https://{base_url}/login"
@@ -224,7 +236,7 @@ def main():
         )
     if pcData[0] != 200:
         exit()
-    print(pcData[1])
+    # print(pcData[1])
 
 
 if __name__ == "__main__":
