@@ -75,7 +75,7 @@ def get_base_url(full_url: str) -> str:
         base_url = "https://" + base_url + "/" + path_segments[1]
         print("BASE URL %s", base_url)
         return base_url
-    return base_url
+    return full_url
 
 
 def return_hostname(url: str) -> str:
@@ -236,7 +236,7 @@ def main():
         )
     if pcData[0] != 200:
         exit()
-    # print(pcData[1])
+    print(pcData[1])
 
 
 if __name__ == "__main__":
