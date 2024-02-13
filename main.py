@@ -61,8 +61,6 @@ def get_base_url(full_url: str) -> str:
     # Construct the base URL by keeping only the scheme, netloc
     # and path (up to the second last segment)
     path_segments = parsed_url.path.split("/")
-    print(path_segments)
-    print(len(path_segments))
     # if len(path_segments) < 2:
     #    base_path = "/".join(path_segments[:-2])  # Remove the last two segments
 
@@ -73,7 +71,6 @@ def get_base_url(full_url: str) -> str:
     if is_twistlock_in_url(full_url):
         base_url = return_hostname(full_url)
         base_url = "https://" + base_url + "/" + path_segments[1]
-        print("BASE URL %s", base_url)
         return base_url
     return full_url
 
