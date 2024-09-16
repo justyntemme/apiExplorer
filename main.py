@@ -46,7 +46,7 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def get_base_url(full_url: str) -> str:
+def get_baseUrl(full_url: str) -> str:
     """
     Extracts the base URL from a full URL string.
 
@@ -67,11 +67,11 @@ def get_base_url(full_url: str) -> str:
     #    else:
     #        base_path = "/".join(path_segments[:-3])  # Remove last segment
 
-    # base_url = urlunparse((parsed_url.scheme, parsed_url.netloc, base_path, "", "", ""))
+    # baseUrl = urlunparse((parsed_url.scheme, parsed_url.netloc, base_path, "", "", ""))
     if is_twistlock_in_url(full_url):
-        base_url = return_hostname(full_url)
-        base_url = "https://" + base_url + "/" + path_segments[1]
-        return base_url
+        baseUrl = return_hostname(full_url)
+        baseUrl = "https://" + base_url + "/" + path_segments[1]
+        return baseUrl
     return full_url
 
 
@@ -119,12 +119,12 @@ def prisma_login(
     Returns:
         Tuple[int, Optional[dict]]: The status code and optionally the token if authentication was successful.
     """
-    base_url = get_base_url(url)
-    if is_twistlock_in_url(base_url):
-        apiURL = f"{base_url}/api/v1/authenticate"
+    baseUrl = get_base_url(url)
+    if is_twistlock_in_url(baseUrl):
+        apiURL = f"{baseUrl}/api/v1/authenticate"
     else:
-        base_url = return_hostname(base_url)
-        apiURL = f"https://{base_url}/login"
+        baseUrl = return_hostname(base_url)
+        apiURL = f"https://{baseUrl}/login"
     headers = {
         "accept": "application/json; charset=UTF-8",
         "content-type": "application/json",
